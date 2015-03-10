@@ -35,10 +35,40 @@ class Viewport(ScatterPlane):
         for c in self.children:
             c.size = self.size
 
-
     def add_widget(self, w, *args, **kwargs):
         super(Viewport, self).add_widget(w, *args, **kwargs)
         w.size = self.size
+
+
+    def on_touch_down(self, touch):
+        def transform(x, y):
+            return x, y/2
+        touch.push()
+        touch.apply_transform_2d(transform)
+        status = super(Viewport, self).on_touch_down(touch)
+        touch.pop()
+        return status
+
+    def on_touch_move(self, touch):
+        def transform(x, y):
+            return x, y/2
+        touch.push()
+        touch.apply_transform_2d(transform)
+        status = super(Viewport, self).on_touch_move(touch)
+        touch.pop()
+        return status
+
+
+    def on_touch_down(self, touch):
+        def transform(x, y):
+            return x, y/2
+        touch.push()
+        touch.apply_transform_2d(transform)
+        status = super(Viewport, self).on_touch_up(touch)
+        touch.pop()
+        return status
+
+
 
 
 

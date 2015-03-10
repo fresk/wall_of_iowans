@@ -5,8 +5,10 @@ from kivy.app import App
 from kivy.lang import Builder as B
 from kivy.factory import Factory as F
 from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.clock import Clock
 from kivy.properties import *
 from kivy.core.window import Window
+from kivy.animation import Animation
 
 from museum import Viewport, ListLayout, ListItem
 
@@ -25,6 +27,7 @@ class GridScreen(Screen):
 class DetailsScreen(Screen):
     iowan = DictProperty()
     photo_tray = ObjectProperty()
+    photo_wall = ObjectProperty()
 
     top_image = StringProperty()
     top_title = StringProperty()
@@ -42,7 +45,6 @@ class DetailsScreen(Screen):
         if died_on:
             born_text += " - "+ died_on
 
-
         self.top_image = self.iowan['image']['file']
         self.top_title = self.iowan['title'] or "" 
         self.top_subtitle = born_text
@@ -56,25 +58,18 @@ class DetailsScreen(Screen):
             self.photo_tray.clear_widgets()
             self.add_photos()
 
+
     def add_photos(self, *args):
 
         
         if self.iowan['artifactimg']:
             self.add_photo(
                 self.iowan['artifactimg']['file'],
-                self.iowan['artifact'] or "",
-                "",
-                self.iowan['artifactshort'] or "",
-                self.iowan['artifactlong'] or "",
                 (150, 0))
 
         if self.iowan['locationimg']:
             self.add_photo(
                 self.iowan['locationimg']['file'],
-                self.iowan['location'] or "",
-                "",
-                self.iowan['locationshort'] or "",
-                self.iowan['locationlong'] or "",
                 (0, -250)
             )
         
@@ -84,22 +79,19 @@ class DetailsScreen(Screen):
         if died_on:
             born_text += " - "+ died_on
 
-        main_photo = self.add_photo(
-            self.iowan['image']['file'],
-            self.iowan['title'] or "",
-            born_text,
-            self.iowan['overview'] or "",
-            self.iowan['bio'] or "",
-            (-200, 0))
+        main_photo = self.add_photo(self.iowan['image']['file'],(-200, 0))
 
 
-    def add_photo(self, fname, title, subtitle,  short_text, long_text, offset):
-        
-        p = Photo(screen=self, source=fname, title=title, subtitle=subtitle, short_text=short_text, long_text=long_text)
-        self.photo_tray.add_widget(p)
+    def add_photo(self, fname, offset):
+
         x,y = 500,550 #p.parent.center
-        p.center = x + offset[0], y + offset[1]
-        p.rotation = (  random.random()-0.5) *35
+        start_pos = x + offset[0], 500 + offset[1]        
+        p = Photo(screen=self, source=fname, start_pos=start_pos)
+        self.photo_tray.add_widget(p)
+        
+
+        p.center = start_pos
+        p.rotation = (random.random()-0.5) *35
         return p
         
 
@@ -107,24 +99,70 @@ class DetailsScreen(Screen):
 class Photo(F.Scatter):
     screen = ObjectProperty()
     source = StringProperty()
-    title = StringProperty()
-    subtitle = StringProperty()
-    short_text = StringProperty()
-    long_text = StringProperty()
+    start_pos = ListProperty()
+    photo_wall = ObjectProperty(None, allownone=True)
+
 
     def on_bring_to_front(self, *args):
         app = App.get_running_app()
         print "BRING TO FRONT"
-        self.screen.top_image = self.source
-        self.screen.top_title = self.title
-        self.screen.top_text = self.short_text
-        self.screen.top_subtitle = self.subtitle
+        # if self.screen:
+        #     self.screen.top_image = self.source
+        #     self.screen.top_title = self.title
+        #     self.screen.top_text = self.short_text
+        #     self.screen.top_subtitle = self.subtitle
 
-        self.screen.bottom_title = self.title
-        self.screen.bottom_text = self.long_text
+        #     self.screen.bottom_title = self.title
+        #     self.screen.bottom_text = self.long_text
+    
+    def reset_view(self, *args):
+        a1 = Animation( scale=1.0, center=self.start_pos, duration=0.3)
+        a1.start(self)
+
+        photo = self
+
+        def on_fade_out(*args):
+            Animation.cancel_all(self)
+            Animation.cancel_all(self.photo_wall)
+            photo.photo_wall.parent.remove_widget(photo.photo_wall)
+            photo.photo_wall = None
+
+        a2 = Animation(opacity=0.0, duration=0.3)
+        a2.bind(on_complete=on_fade_out)
+        a2.start(self.photo_wall)
 
 
 
+
+
+    def init_timeout(self):
+        self._timeout_func = Clock.schedule_once(self.reset_view, 1.0)
+
+    def reset_timeout(self):
+        self._timeout_func.cancel()
+        self._timeout_func = Clock.schedule_once(self.reset_view, 1.0)
+
+    def on_transform_with_touch(self, *args):
+        if not self.photo_wall:
+            self.photo_wall = PhotoWall(source=self.source)
+            self.screen.top_layout.add_widget(self.photo_wall)            
+            print "PHOTOWALL", self.start_pos
+            self.init_timeout()
+
+        pos, size = self.bbox
+        self.photo_wall.offset_x = self.x 
+        self.photo_wall.offset_y = self.y 
+        self.photo_wall.rotation = self.rotation
+        self.photo_wall.scale = self.scale
+        self.reset_timeout()
+        
+
+class PhotoWall(F.Widget):
+    source = StringProperty()
+    scale = NumericProperty()
+    rotation = NumericProperty()
+    offset_x = NumericProperty()
+    offset_y = NumericProperty()
 
 
 

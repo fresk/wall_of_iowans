@@ -21,6 +21,19 @@ def clean_text(text):
     
     return text
 
+
+
+def parse_number(s):
+
+    numbers = [int(s) for s in str.split(" ") if s.isdigit()]
+    if len(numbers) == 1: 
+        return [int(s) for s in str.split(" ") if s.isdigit()][0]
+    else:
+        return 0
+    
+
+
+
 def save_image(url):
     fname = "cache/"+hashlib.md5(url).hexdigest()+".jpg"
     if not os.path.isfile(fname):
@@ -50,6 +63,13 @@ for p in iowans:
 
     if p['image_alt']:
         p['image_alt']['file'] = save_image(p['image_alt']['url'])
+
+    p['bio'] = clean_text(p['bio'])
+    
+
+    
+    p['yearofdeath'] = parse_number(p['yearofdeath'])
+    p['yearofbirth'] = parse_number(p['yearofbirth'])
 
     p['bio'] = clean_text(p['bio'])
     p['overview'] = clean_text(p['overview'])

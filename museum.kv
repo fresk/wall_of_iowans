@@ -4,8 +4,8 @@
     BoxLayout:
         orientation: 'vertical'
         
-        HDImage:
-            source: "img/intro-top-bg.png"
+        Video:
+            source: "data/video.mp4"
         HDImage:
             source: "img/intro-bottom-bg.png"
 
@@ -74,15 +74,13 @@
 <DetailsScreen>:
     iowan: app.selected_iowan
     photo_tray: photo_tray
+    top_layout: top_layout
+
 
 
     canvas:
         Color: 
             rgba: 1,1,1,root.opacity
-        Rectangle:
-            pos: 0,1080
-            size: 1920,1080
-            source: "img/bg-single-top.png"
         Rectangle:
             pos: 0,0
             size: 1920,1080
@@ -93,41 +91,51 @@
         orientation: 'vertical'
 
         #TOP
-        BoxLayout:
-            orientation: 'horizontal'
-
+        RelativeLayout:
+            id: top_layout
             BoxLayout:
-                size_hint_x: 0.45
-                orientation: 'vertical'
-                padding: 50
-                WhiteSpace:
-                    height: 50
-                Image:
-                    source: root.top_image
-                WhiteSpace:
-                    height: 50
+                orientation: 'horizontal'
 
-            BoxLayout:
-                size_hint_x: 0.55
-                orientation: 'vertical'
-                padding_x: 30
-                spacing: 10
-                WhiteSpace:
-                    height: 80
-                H1:
-                    text: root.top_title
-                H3:
-                    text: root.top_subtitle + "\n"+ root.top_category
-                WhiteSpace:
-                    height: 20
-                H3:
-                    text: root.top_text
-                WhiteSpace:
-                    size_hint: 1, 1
+                BoxLayout:
+                    size_hint_x: 0.45
+                    orientation: 'vertical'
+                    padding: 50
+                    WhiteSpace:
+                        height: 50
+                    Image:
+                        source: root.top_image
+                    WhiteSpace:
+                        height: 50
+
+                BoxLayout:
+                    size_hint_x: 0.55
+                    orientation: 'vertical'
+                    padding_x: 30
+                    spacing: 10
+                    WhiteSpace:
+                        height: 80
+                    H1:
+                        text: root.top_title
+                    H3:
+                        text: root.top_subtitle + "\n"+ root.top_category
+                    WhiteSpace:
+                        height: 20
+                    H3:
+                        text: root.top_text
+                    WhiteSpace:
+                        size_hint: 1, 1
 
 
 
-        BoxLayout:
+        BoxMask:
+            canvas:
+                Color: 
+                    rgba: 1,1,1,root.opacity
+                Rectangle:
+                    pos: 0,0
+                    size: 1920,1080
+                    source: "img/bg-single-bottom.png"
+
             orientation: 'horizontal'
 
             Widget:
@@ -205,6 +213,18 @@
 
 
 
+<PhotoWall>:
+    canvas:
+        Color:
+            rgba: .1, .1, .1, 1.0
+        Rectangle:
+            pos: 0,0
+            size: 1920, 1080
+    Photo:
+        source: root.source
+        scale: root.scale + 1.0
+        rotation: root.rotation
+        pos: root.offset_x, root.offset_y
 
 
 

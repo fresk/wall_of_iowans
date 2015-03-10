@@ -7,6 +7,8 @@ from kivy.core.window import Window
 from kivy.uix.widget import Widget
 from kivy.uix.scatter import ScatterPlane
 from kivy.uix.relativelayout import RelativeLayout
+from kivy.uix.stencilview import StencilView
+from kivy.uix.boxlayout import BoxLayout
 from kivy.animation import Animation
 from kivy.properties import *
 
@@ -64,7 +66,8 @@ class ListLayout(RelativeLayout):
 
 
 
-    
+class BoxMask(BoxLayout, StencilView):
+    pass
 
 
 

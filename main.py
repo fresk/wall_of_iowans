@@ -10,7 +10,7 @@ from kivy.properties import *
 from kivy.core.window import Window
 from kivy.animation import Animation
 
-from museum import Viewport, ListLayout, ListItem
+from museum import Viewport, ListLayout, ListItem, TouchTransform
 
 
 
@@ -298,8 +298,11 @@ class MuseumApp(App):
         self.screen_manager.add_widget(DetailsScreen(name='details'))
         self.screen_manager.current = 'intro'
 
+        self.input_transform = TouchTransform()
+        self.input_transform.add_widget(self.screen_manager)
+
         self.viewport = Viewport(size=(1920, 1080*2))
-        self.viewport.add_widget(self.screen_manager)
+        self.viewport.add_widget(self.input_transform)
         return self.viewport
 
     def load_data(self):

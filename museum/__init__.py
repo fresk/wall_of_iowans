@@ -40,21 +40,33 @@ class Viewport(ScatterPlane):
         w.size = self.size
 
 
+
+
+class TouchTransform(BoxLayout):
+    pos_pre = ListProperty([0,0])
+    pos_post = ListProperty([0,0])
+
     def on_touch_down(self, touch):
+        print("DOWN")
         def transform(x, y):
             return x, y/2
+        self.pos_pre = [touch.x, touch.y]
         touch.push()
         touch.apply_transform_2d(transform)
-        status = super(Viewport, self).on_touch_down(touch)
+        self.pos_post = [touch.x, touch.y]
+        status = super(TouchTransform, self).on_touch_down(touch)
         touch.pop()
         return status
 
     def on_touch_move(self, touch):
+        print("MOVE")
         def transform(x, y):
             return x, y/2
+        self.pos_pre = [touch.x, touch.y]
         touch.push()
         touch.apply_transform_2d(transform)
-        status = super(Viewport, self).on_touch_move(touch)
+        self.pos_post = [touch.x, touch.y]
+        status = super(TouchTransform, self).on_touch_move(touch)
         touch.pop()
         return status
 
@@ -62,9 +74,11 @@ class Viewport(ScatterPlane):
     def on_touch_down(self, touch):
         def transform(x, y):
             return x, y/2
+        self.pos_pre = [touch.x, touch.y]
         touch.push()
         touch.apply_transform_2d(transform)
-        status = super(Viewport, self).on_touch_up(touch)
+        self.pos_post = [touch.x, touch.y]
+        status = super(TouchTransform, self).on_touch_up(touch)
         touch.pop()
         return status
 

@@ -1,41 +1,140 @@
 #:kivy 1.9
 
+#:import random random.random
 
-<StartScreen>:
-    orientation: 'vertical'
-    Video:
-        size: 1920, 1080
-        source: "img/movie.ogg"
-        play: True
-        loop: True
-    AnchorLayout:
-        anchor_x: 'center'
-        anchor_y: 'bottom'
-        padding: 100
-        Image:
-            source: "img/start.png"
-            size_hint: None, None
-            size: 970, 333
-            
+<IntroScreen>:
+    BoxLayout
+        orientation: 'vertical'
+        Video:
+            size: 1920, 1080
+            source: "img/movie.ogg"
+            play: True
+            loop: True
+        AnchorLayout:
+            anchor_x: 'center'
+            anchor_y: 'bottom'
+            padding: 100
+            Image:
+                source: "img/start.png"
+                size_hint: None, None
+                size: 970, 333
+                
 
+
+
+<CategoryButton>:
+    size_hint: None, None
+    size: 500, 125
+    active: toggle.state == 'down'
+
+    ToggleButton:
+        id: toggle
+        background_normal: root.background_down
+        background_down: root.background_normal 
+        on_press: root.on_press()
+
+
+<MapScreen>:
+    MapView:
+        size_hint: None, None
+        items: app.filtered_iowans
+        center: 1920/2, 600
+        
+
+
+    Widget:
+        CategoryButton:
+            category: "Athletics"
+            background_normal: "img/athletics.png"
+            background_down: "img/athletics_down.png"
+            y:300
+
+        CategoryButton:
+            category: "Entertainment &amp; Arts"
+            background_normal: "img/arts.png"
+            background_down: "img/arts_down.png"
+            y:300 + 125
+
+        CategoryButton:
+            category: "Leadership"
+            background_normal: "img/leadership.png"
+            background_down: "img/leadership_down.png"
+            y:300 + (125*2)
+
+        CategoryButton:
+            category: "Science &amp; Technology"
+            background_normal: "img/science.png"
+            background_down: "img/science_down.png"
+            y:300 + (125*3)
+
+    Button:
+        background_normal: "img/btn-switch.png"
+        background_down: "img/btn-switch.png"
+        size: 200,200
+        size_hint: None, None
+        x: 1920 - self.width
+        y: 1080 - self.height
+        on_press: app.sm.current = 'overview'
 
 
 
 <OverviewScreen>:
+    selection: app.selected_iowan
+    scroll_list: scroll_list
+
+    Widget:
+        Label:
+            id: top_title
+            font_name: "img/open-sans/OpenSans-Light.ttf"
+            font_size: 70
+            text: app.selected_iowan['title']
+            center: 1920/2, 1240
+        Label:
+            font_name: "img/open-sans/OpenSans-Bold.ttf"
+            font_size: 70
+            text: app.selected_iowan['location']
+            center_x: 1920/2
+            height: self.texture_size[1]
+            y: top_title.y - self.height + 20
+            text_size: 1800, None
+            multiline: True
+            halign:'center'
+
     BoxLayout:
         orientation:'vertical'
         AnchorLayout:
             anchor_x: 'center'
             anchor_y: 'bottom'
-            padding: 100
+            padding: 250
             MapView:
                 items: root.items
         ScrollListView: 
+            id: scroll_list
             items: root.items
 
 
 
+    Button:
+        background_normal: "img/btn-switch.png"
+        background_down: "img/btn-switch.png"
+        size: 200,200
+        size_hint: None, None
+        x: 1920 - self.width
+        y: 1080 - self.height
+        on_press: app.sm.current = 'map'
+
+
+
 <DetailScreen>:
+    title_text: app.selected_iowan['title']
+    lifetime_text: str(app.selected_iowan['birth_to_death'])
+    excerpt_text: app.selected_iowan['overview']
+    detail_text: app.selected_iowan['bio']
+    detail_type: app.detail_type
+    inactivity_timer: app.inactivity_timer
+    featured_photo: app.selected_iowan['image_source']
+    zoom_photo: zoom_photo
+    photo_tray: photo_tray
 
     canvas:
         Rectangle:
@@ -48,9 +147,18 @@
             size: 1920, 1080
             source: "img/bg-single-top.png"
 
+    Image:
+        id: picture
+        source: root.featured_photo
+        allow_stretch: True
+        size_hint: None, None
+        size: 720, 1080
+        pos: 240, 1080
+
+
     H1:
         id: title
-        text: app.selected_iowan['title']
+        text: root.title_text
         padding: 75, 0
         width: 1920/2
         x: 1920/2
@@ -59,14 +167,14 @@
 
     H2:
         id: datelabel
-        text: str(app.selected_iowan['birth_to_death'])
+        text: root.lifetime_text
         padding: 75, 0
         width: 1920/2
         x: 1920/2
         y: title.y - self.height
 
     H3:
-        text: app.selected_iowan['overview']
+        text: root.excerpt_text
         x: 1920/2
         y: datelabel.y - self.height -50
         padding: 75, 0
@@ -75,48 +183,98 @@
     H1:
         id: bottom_title
         color: [0,0,0,1]
-        text: app.selected_iowan['title']
+        text: root.title_text
         x: 1920/2
         y: 1080 - self.height -50
         padding: 75, 0
         width: 1920/2
 
+
+    H2:
+        id: datelabelbottom
+        color: [0,0,0,1]
+        text: root.lifetime_text
+        padding: 75, 0
+        width: 1920/2
+        x: 1920/2
+        y: bottom_title.y - self.height
+
+
     Text:
         color: [0,0,0,1]
-        text: app.selected_iowan['bio']
+        text: root.detail_text
         x: 1920/2
-        y: bottom_title.y - self.height -50
+        y: datelabelbottom.y - self.height -50
         padding: 75, 0
         width: 1920/2
 
 
-    Photo:
-        source: app.selected_iowan['locationimg_source']
-        center: 450,540
-    Photo:
-        source: app.selected_iowan['artifactimg_source']
-        center: 450,540
-    Photo:
-        source: app.selected_iowan['image_source']
-        center: 450,540
+    StencilView:
+        pos: 0,0
+        size: 1920,1080
+
+        id: photo_tray
+        
+        Photo:
+            pos: 250,50
+            rotation:  -1
+            photo_type: 'location'
+            source: app.selected_iowan['locationimg_source']
+
+        Photo:
+
+            pos: 350,400
+            rotation:  -8
+            photo_type: 'artifact'
+            source: app.selected_iowan['artifactimg_source']
+
+        Photo:
+            pos: 50, 380
+            rotation:  12
+            photo_type: 'primary'
+            source: app.selected_iowan['image_source']
+            
 
 
     StencilView:
         pos: 0,1080
         size: 1920,1080
+
+        canvas:
+            Color:
+                rgba: 0,0,0, root.backdrop_alpha
+            Rectangle:
+                pos: self.pos
+                size: 1920,1080
+
+
         ScatterPlane:
+            id: zoom_photo
             do_rotation: False
             do_translation: False
             do_scale: False
             transform: app.photo_transform
-            pos: 240, 1080
+
             Image:
                 id: picture
-                source: app.selected_iowan['image_source']
-                allow_stretch: True
+                opacity: root.backdrop_alpha
+                source: root.featured_photo
+                allow_stretch: False
                 size_hint: None, None
-                size: 720, 1080
+                pos: 0,0
+                size: 500,500
+                
 
+
+
+    Button:
+        background_normal: "img/btn-back.png"
+        background_down: "img/btn-back.png"
+        size: 200,200
+        size_hint: None, None
+        x: 0
+        y: 1080- self.height
+        on_press: app.sm.current = 'overview'
 
 
 # <GridScreen>:

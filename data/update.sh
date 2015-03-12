@@ -16,7 +16,6 @@ mkdir -p ./cache/512
 
 #curl -X GET http://www.fresksite.net/dcadb/wp-content/themes/dca/api/iowans.php > _iowans.json
 python sanitize.py
-
 exit
 
 
@@ -29,18 +28,18 @@ if [[ "$OSTYPE" =~ ^darwin ]]; then
     sips -Z 128 cache/original/* --out ./cache/128
     sips -Z 256 cache/original/* --out ./cache/256 
     sips -Z 512 cache/original/* --out ./cache/512
-    kivy -m kivy.atlas cache/128 2048x2048 ./cache/128/*
-    kivy -m kivy.atlas cache/256 2048x2048 ./cache/256/*
-    kivy -m kivy.atlas cache/512 2048x2048 ./cache/512/*
+    kivy -m kivy.atlas cache/128atlas 2048x2048 ./cache/128/*
+    kivy -m kivy.atlas cache/256atlas 2048x2048 ./cache/256/*
+    kivy -m kivy.atlas cache/512atlas 2048x2048 ./cache/512/*
 
     kivy -m kivy.atlas cache/alt 2048x2048 ./cache/256/alt-*
 
 else
 
     for file in cache/original/*; do 
-        convert $file -resize 128x128 cache/128/`basename $file`; 
-        convert $file -resize 256x256 cache/256/`basename $file`; 
-        convert $file -resize 512x512 cache/512/`basename $file`; 
+        convert $file -resize 128x128 cache/128atlas/`basename $file`; 
+        convert $file -resize 256x256 cache/256atlas/`basename $file`; 
+        convert $file -resize 512x512 cache/512atlas/`basename $file`; 
         echo -n "."
     done
 
@@ -53,10 +52,10 @@ else
     echo "generating atlases"
     # sips -Z 256 cache/original/* --out ./cache/256 
     # sips -Z 512 cache/original/* --out ./cache/512
-    python -m kivy.atlas cache/128 2048x2048 ./cache/128/*
-    python -m kivy.atlas cache/alt 2048x2048 ./cache/256/alt-*
-    # python -m kivy.atlas cache/256 2048x2048 ./cache/128/*
-    # python -m kivy.atlas cache/512 2048x2048 ./cache/512/*
+    #python -m kivy.atlas cache/128 2048x2048 ./cache/128/*
+    #python -m kivy.atlas cache/alt 2048x2048 ./cache/256/alt-*
+    #python -m kivy.atlas cache/256 2048x2048 ./cache/128/*
+    python -m kivy.atlas cache/512 2048x2048 ./cache/512/*
 
 
 fi

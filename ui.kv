@@ -11,6 +11,13 @@
         
 
 
+<TransformLayer>:
+    do_translation: False
+    do_rotation: False
+    do_scale: False
+
+
+
 
 
 <ScrollListView>:
@@ -23,12 +30,12 @@
         do_translation_x: False
         do_rotation: False
         do_scale: False
-        height: 600
+
 
         GridLayout:
             id: list_container
             padding: 0
-            height: 600
+            height: 800
             
             rows: 1
             spacing: 0
@@ -38,10 +45,12 @@
 
 <ListPhoto>
     size_hint: None, None
-    size: 410,512
-
+    #size: (800,800) if root.data['title'] == app.selected_iowan['title'] else (512, 512)
+    size: (800,800)
     Image:
-        size: 410,512
+        size: (800,800)
+        #size: (800,800) if root.data['title'] == app.selected_iowan['title'] else (512,512)
+        opacity: 1.0 if root.data['title'] == app.selected_iowan['title'] else 0.7
         allow_stretch: True
         source: 'atlas://data/cache/alt/'+root.data['image_alt'].get('image_id', 'anon')
 
@@ -58,6 +67,7 @@
     ScatterPlane:
         size: root.size
         size_hint: None, None
+        scale: 1
         id: container
         canvas:
             Color: 
@@ -71,11 +81,11 @@
     size: 75, 75
     size_hint: None, None
     Button:
-        size: 75, 75
+        size: (150,150) if root.data == app.selected_iowan else (75,75)
         size_hint: None, None
-        background_normal: 'img/marker.png'
-        background_down: 'img/marker.png'
-        opacity: 0.6
+        background_normal: 'img/star.png' if root.data == app.selected_iowan else 'img/marker.png'
+        background_down: 'img/star.png' if root.data == app.selected_iowan else 'img/marker.png'
+        
         on_press: root.on_press()
 
 
@@ -109,7 +119,7 @@
 
 <TextBase@Label>:
     font_name: "img/open-sans/OpenSans-Regular.ttf"
-    size_hint_y: None
+    size_hint: None, None
     text_size: self.width, None
     height: self.texture_size[1]
     multiline: True
@@ -129,7 +139,7 @@
 <H1@Text>
     font_name: "img/open-sans/OpenSans-Light.ttf"
     font_size: 90
-    bold: True
+
 
 <H2@Text>
     font_size: 55

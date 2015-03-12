@@ -152,8 +152,10 @@ class ScrollList(ListLayout):
         Clock.schedule_once(self.update_velocity, 1.0/60.0)
 
     def on_selection(self, *args):
-        print self.selection[0]['title']
-        #App.get_running_app().selected_county = item['name'].replace("-", "_")
+
+        if len(self.selection):
+            App.get_running_app().selected_iowan = self.selection[0]
+
 
     
     def on_touch_up(self, touch):
@@ -181,8 +183,12 @@ class ScrollList(ListLayout):
                 self.velocity = 0
                 if self.layout and len(self.layout.children):
                      x,y = max(min(touch.x - self.total_offset, self.layout.width-1), 0), 10 
-                     idx = int(x / 410)
+                     w = self.layout.children[0].width
+                     idx = int(x / w)
                      btn = (self.layout.children[::-1])[idx]
+                     app = App.get_running_app()
+                     if app.selected_iowan == btn.data:
+                        app.sm.current = 'detail'
                      self.selection = [btn.data]
 
             self.drag_touch_id = None

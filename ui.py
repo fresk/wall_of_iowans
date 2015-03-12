@@ -8,15 +8,47 @@ from museum import *
 
 
 
+class CategoryButton(ListItem):
+    category = StringProperty()
+    active = BooleanProperty()
+    background_normal = StringProperty()
+    background_down = StringProperty()
+
+    def on_data(self, *args):
+        self.text = self.data['text']
+
+    def on_press(self, *args):
+        app = App.get_running_app()
+        app.filter_categories(self.parent.children[:])
+
+
+
+class TransformLayer(F.ScatterLayout):
+    pass
+
+
 class Photo(F.Scatter):
+    photo_type = StringProperty('primary')
     source = StringProperty()
+    is_zooming = BooleanProperty(False)
 
     def on_transform_with_touch(self, touch):
         app = App.get_running_app()
-        trans = self.transform.multiply(Matrix())        
-        app.photo_transform = trans.translate(300,800,0)
+        if self.is_zooming:
+            screen = self.parent.parent
+            cx, cy = self.center
+            trans = Matrix().multiply(self.transform)
+            trans.translate(0,1080,0)
+            app.photo_transform = trans
 
+    def on_bring_to_front(self, *args):
+        self.parent.parent.detail_type = self.photo_type  
+        
 
+    def on_scale(self, *args):
+        if (self.is_zooming == False) and self.scale > 1.3:
+            self.parent.parent.show_photo_zoom()
+            self.is_zooming = True
 
 
 

@@ -77,10 +77,10 @@ for p in iowans:
     p['artifactimg'] = save_image(p['artifactimg'], 'artifact')
 
 
-    p['image_source'] = "atlas://data/cache/512/"+p['image']['image_id']
-    p['locationimg_source'] = "atlas://data/cache/512/"+p['locationimg']['image_id']
-    p['image_alt_source'] = "atlas://data/cache/512/"+p['image_alt']['image_id']
-    p['artifactimg_source'] = "atlas://data/cache/512/"+p['artifactimg']['image_id']
+    p['image_source'] = "atlas://data/cache/512atlas/"+p['image']['image_id']
+    p['locationimg_source'] = "atlas://data/cache/512atlas/"+p['locationimg']['image_id']
+    p['image_alt_source'] = "atlas://data/cache/512atlas/"+p['image_alt']['image_id']
+    p['artifactimg_source'] = "atlas://data/cache/512atlas/"+p['artifactimg']['image_id']
 
     p['bio'] = clean_text(p['bio'])
     

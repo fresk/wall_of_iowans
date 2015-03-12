@@ -1,5 +1,5 @@
 *.DS_Store
-
+data/*.m4v
 data/*.json
 data/cache
 

@@ -2,14 +2,19 @@ import json
 import requests
 import hashlib
 import os.path
+import os
+import unicodedata
+
 
 import HTMLParser
 _htmlparser = HTMLParser.HTMLParser()
 unescape_html = _htmlparser.unescape
 
 def clean_text(text):
-    if not isinstance(text, basestring):
-        return text
+    if type(text) == bool:
+        return ""
+
+    text = text.encode('ascii','ignore')
     text = unescape_html(text)
     text = text.replace("<br/>", "\n\n")
     text = text.replace("<br />", "\n\n")
@@ -24,7 +29,6 @@ def clean_text(text):
 
 
 def parse_number(s):
-
     numbers = [int(s) for s in str.split(" ") if s.isdigit()]
     if len(numbers) == 1: 
         return [int(s) for s in str.split(" ") if s.isdigit()][0]
@@ -34,14 +38,30 @@ def parse_number(s):
 
 
 
-def save_image(url):
-    fname = "cache/"+hashlib.md5(url).hexdigest()+".jpg"
-    if not os.path.isfile(fname):
+def save_image(image_data, group):
+    if not (image_data and image_data.get('url')):
+        return {'file': 'img/anon.jpg', 'image_id': 'anon'}
+
+    url = image_data['url']
+
+    fileid = group +"-"+ hashlib.md5(url).hexdigest()
+    fname = './cache/original/' + fileid + "."+url.split(".")[-1]
+    
+    if not os.path.exists(fname):
         print "fetching:", url
         req = requests.get(url)
         with open(fname, 'wb') as fout:
             fout.write(req.content)
-    return "data/"+fname
+    else:
+        print 'using cached file:'
+        print '   ', url
+        print '   ', fname
+
+    image_data['file'] = fname
+    image_data['image_id'] = fileid
+
+    return image_data #"atlas://data/atlas/"+fileid
+
 
 
 
@@ -50,26 +70,39 @@ def save_image(url):
 iowans = json.load(open('_iowans.json', 'r'))
 
 for p in iowans:
-    print p['title']
 
-    if p['image']:
-        p['image']['file'] =  save_image(p['image']['url']) 
+    p['image'] = save_image(p['image'], 'primary')
+    p['locationimg'] = save_image(p['locationimg'], 'location')
+    p['image_alt'] = save_image(p['image_alt'], 'alt')
+    p['artifactimg'] = save_image(p['artifactimg'], 'artifact')
 
-    if p['locationimg']:
-        p['locationimg']['file'] = save_image(p['locationimg']['url'])
 
-    if p['artifactimg']:
-        p['artifactimg']['file'] = save_image(p['artifactimg']['url'])
-
-    if p['image_alt']:
-        p['image_alt']['file'] = save_image(p['image_alt']['url'])
+    p['image_source'] = "atlas://data/cache/512/"+p['image']['image_id']
+    p['locationimg_source'] = "atlas://data/cache/512/"+p['locationimg']['image_id']
+    p['image_alt_source'] = "atlas://data/cache/512/"+p['image_alt']['image_id']
+    p['artifactimg_source'] = "atlas://data/cache/512/"+p['artifactimg']['image_id']
 
     p['bio'] = clean_text(p['bio'])
     
 
     
-    p['yearofdeath'] = parse_number(p['yearofdeath'])
-    p['yearofbirth'] = parse_number(p['yearofbirth'])
+    p['yearofdeath'] = clean_text(p['yearofdeath'])
+    p['yearofbirth'] = clean_text(p['yearofbirth'])
+
+    p['birth_to_death'] =  str(p['yearofbirth']) + " - " + str(p['yearofdeath'])
+
+
+    try:
+        p['yearofdeath'] = int(p['yearofdeath'])
+    except:
+        p['yearofdeath'] = 9999
+
+    try:
+        p['yearofbirth'] = int(p['yearofbirth'])
+    except:
+        p['yearofbirth'] = -9999
+
+
 
     p['bio'] = clean_text(p['bio'])
     p['overview'] = clean_text(p['overview'])

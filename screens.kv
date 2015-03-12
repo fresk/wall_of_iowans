@@ -1,0 +1,134 @@
+#:kivy 1.9
+
+
+<StartScreen>:
+    orientation: 'vertical'
+    Video:
+        size: 1920, 1080
+        source: "img/movie.ogg"
+        play: True
+        loop: True
+    AnchorLayout:
+        anchor_x: 'center'
+        anchor_y: 'bottom'
+        padding: 100
+        Image:
+            source: "img/start.png"
+            size_hint: None, None
+            size: 970, 333
+            
+
+
+
+
+<OverviewScreen>:
+    BoxLayout:
+        orientation:'vertical'
+        AnchorLayout:
+            anchor_x: 'center'
+            anchor_y: 'bottom'
+            padding: 100
+            MapView:
+                items: root.items
+        ScrollListView: 
+            items: root.items
+
+
+
+<DetailScreen>:
+
+    canvas:
+        Rectangle:
+            pos: 0,0
+            size: 1920, 1080
+            source: "img/bg-single-bottom.png"
+
+        Rectangle:
+            pos: 0,1080
+            size: 1920, 1080
+            source: "img/bg-single-top.png"
+
+    H1:
+        id: title
+        text: app.selected_iowan['title']
+        padding: 75, 0
+        width: 1920/2
+        x: 1920/2
+        y: 1080*2 - self.height - 100
+
+
+    H2:
+        id: datelabel
+        text: str(app.selected_iowan['birth_to_death'])
+        padding: 75, 0
+        width: 1920/2
+        x: 1920/2
+        y: title.y - self.height
+
+    H3:
+        text: app.selected_iowan['overview']
+        x: 1920/2
+        y: datelabel.y - self.height -50
+        padding: 75, 0
+        width: 1920/2
+
+    H1:
+        id: bottom_title
+        color: [0,0,0,1]
+        text: app.selected_iowan['title']
+        x: 1920/2
+        y: 1080 - self.height -50
+        padding: 75, 0
+        width: 1920/2
+
+    Text:
+        color: [0,0,0,1]
+        text: app.selected_iowan['bio']
+        x: 1920/2
+        y: bottom_title.y - self.height -50
+        padding: 75, 0
+        width: 1920/2
+
+
+    Photo:
+        source: app.selected_iowan['locationimg_source']
+        center: 450,540
+    Photo:
+        source: app.selected_iowan['artifactimg_source']
+        center: 450,540
+    Photo:
+        source: app.selected_iowan['image_source']
+        center: 450,540
+
+
+    StencilView:
+        pos: 0,1080
+        size: 1920,1080
+        ScatterPlane:
+            do_rotation: False
+            do_translation: False
+            do_scale: False
+            transform: app.photo_transform
+            pos: 240, 1080
+            Image:
+                id: picture
+                source: app.selected_iowan['image_source']
+                allow_stretch: True
+                size_hint: None, None
+                size: 720, 1080
+
+
+
+# <GridScreen>:
+#     orientation: 'vertical'
+
+#     Grid:
+#         items: root.items
+        
+#     AnchorLayout:
+#         size: 1920,1080
+#         anchor_x: 'center'
+#         anchor_y: 'center'
+        
+#         H1:
+#             text: "grid"

@@ -1,0 +1,138 @@
+#:kivy 1.9
+
+
+<Photo>:
+    size_hint: None, None
+    size: 500,500
+    Image:
+        pos: 0,0
+        size: 500,500
+        source: root.source
+        
+
+
+
+
+<ScrollListView>:
+    scroll_layer: scroller
+    layout: list_container
+
+    ScatterPlane:
+        id: scroller
+        do_translation_y: False
+        do_translation_x: False
+        do_rotation: False
+        do_scale: False
+        height: 600
+
+        GridLayout:
+            id: list_container
+            padding: 0
+            height: 600
+            
+            rows: 1
+            spacing: 0
+            width: self.minimum_width
+            size_hint_x: None
+
+
+<ListPhoto>
+    size_hint: None, None
+    size: 410,512
+
+    Image:
+        size: 410,512
+        allow_stretch: True
+        source: 'atlas://data/cache/alt/'+root.data['image_alt'].get('image_id', 'anon')
+
+
+
+
+
+
+
+<MapView>:
+    layout: container
+    size: 1024, 676
+    size_hint: None, None
+    ScatterPlane:
+        size: root.size
+        size_hint: None, None
+        id: container
+        canvas:
+            Color: 
+                rgba: 1,1,1,root.opacity
+            Rectangle:
+                pos: 0,0
+                size: self.size
+                source: "img/iowa.png"
+
+<MapMarker>:
+    size: 75, 75
+    size_hint: None, None
+    Button:
+        size: 75, 75
+        size_hint: None, None
+        background_normal: 'img/marker.png'
+        background_down: 'img/marker.png'
+        opacity: 0.6
+        on_press: root.on_press()
+
+
+   
+
+
+<Grid>:
+    layout: gridlayout
+    GridLayout:
+        id: gridlayout
+        cols: 8
+
+
+<GridItem>:
+    Image: 
+        source: root.photo_source
+        allow_stretch: True
+     
+
+
+
+
+
+<HDImage@Image>:
+    size_hint: None, None
+    size: 1920, 1080
+    allow_stretch: True
+
+    
+
+
+<TextBase@Label>:
+    font_name: "img/open-sans/OpenSans-Regular.ttf"
+    size_hint_y: None
+    text_size: self.width, None
+    height: self.texture_size[1]
+    multiline: True
+    markup: True
+
+
+<WhiteSpace@Widget>
+    size_hint: None, None
+    size: 10,10
+
+
+
+<Text@TextBase>:
+    font_size: 30
+    color: 1,1,1,1
+
+<H1@Text>
+    font_name: "img/open-sans/OpenSans-Light.ttf"
+    font_size: 90
+    bold: True
+
+<H2@Text>
+    font_size: 55
+
+<H3@Text>
+    font_size: 46

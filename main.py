@@ -6,7 +6,7 @@ from kivy.lang import Builder
 from kivy.animation import Animation
 from kivy.properties import *
 from kivy.graphics.transformation import Matrix
-from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.uix.screenmanager import *
 
 from museum import *
 from ui import *
@@ -26,7 +26,7 @@ DB = sorted(DB, key=lambda k: int(k['yearofbirth']))
 
 def animate(widget, **kwargs):
     if not widget:
-        retuen
+        return
     Animation.cancel_all(widget)
     a = Animation(**kwargs)
     a.start(widget)
@@ -39,29 +39,60 @@ class OverviewScreen(Screen):
     selection = ObjectProperty()
     scroll_list = ObjectProperty()
 
+    def on_touch_move(self, *args):
+        app = App.get_running_app()
+        app.inactivity_timer = 0
+        super(OverviewScreen, self).on_touch_move(*args)
+
 
 
 class MapScreen(Screen):
     items = ListProperty()
     selection = ObjectProperty()
 
+    def on_touch_move(self, *args):
+        app = App.get_running_app()
+        app.inactivity_timer = 0
+        super(MapScreen, self).on_touch_move(*args)
+
 
 
 
 class IntroScreen(Screen):
-    def hide(self):
-        def done(*args):
-            p = self.parent
-            p.add_widget(OverviewScreen())
-            p.remove_widget(self)
-            
-        anim = Animation(opacity=0.0)
-        anim.bind(on_complete=done)
-        anim.start(self)
+    fade = NumericProperty(0)
+    video = ObjectProperty()
+    eos = BooleanProperty()
+
 
     def on_touch_down(self, touch):
         app = App.get_running_app()
-        app.sm.current = 'overview'
+        app.inactivity_timer = 0
+        app.show_overview()
+
+    def on_eos(self, *args):
+        if self.eos:
+            self.restart_video()
+
+
+    def hide_fade_overlay(self, *args):
+        self.fade = 0
+
+    def start_video(self, *args):
+        self.video.opacity = 1
+        self.video.source = 'img/movie.ogg'
+        self.video.state = 'play'
+        Clock.schedule_once(self.hide_fade_overlay, 0.5)
+
+    def restart_video(self, *args):
+        self.fade = 1.0
+        self.video.source = ""
+        self.video.opacity = 0
+        self.video.state = 'stop'
+        self.video.seek(0)
+        self.video.position = 0
+        self.video.state = 'play'
+        Clock.schedule_once(self.start_video)
+
 
 
 
@@ -105,13 +136,30 @@ class DetailScreen(Screen):
 
 
 
+    def place_photo(self, photo, *args):
+        if photo.photo_type == 'primary':
+            p = (50,380) if not ('anon' in app.selected_iowan['image_source']) else (5000,0)
+            animate(photo, pos=p, scale=1 )
+
+        if photo.photo_type == 'location':
+            p = (250,50) if not ('anon' in app.selected_iowan['locationimg_source']) else (5000,0)
+            animate(photo, pos=p, scale=1 )
+        if photo.photo_type == 'artifact':
+            p = (350,400) if not ('anon' in app.selected_iowan['artifactimg_source']) else (5000,0)
+            animate(photo, pos=p, scale=1 )
+
+
+
     def hide_photo_zoom(self, *args):
         animate(self, backdrop_alpha=0.0)
         animate(self.zoom_photo, y=-3000, t='in_back')
 
-        animate(self.photo_tray.children[0], pos=(250,50), scale=1 )
-        animate(self.photo_tray.children[1], pos=(350,400), scale=1)
-        animate(self.photo_tray.children[2], pos=(50,380), scale=1)
+        if not (self.photo_tray and len(self.photo_tray.children)):
+            return
+
+        self.place_photo(self.photo_tray.children[0])
+        self.place_photo(self.photo_tray.children[1])
+        self.place_photo(self.photo_tray.children[2])
 
         def stop_zooming(*args):
             self.photo_tray.children[0].is_zooming = False
@@ -159,15 +207,24 @@ class WOIApp(App):
     inactivity_timer = NumericProperty()
 
 
+    def on_inactivity_timer(self, *args):
+        if self.inactivity_timer == 60:
+            self.sm.current = 'intro'
+
+    def reset_video(self, *args):
+        self.intro.restart_video()
+
     def tick_timer(self, *args):
         self.inactivity_timer = self.inactivity_timer + 1
 
     def build(self):
+        self.from_screen = 'overview'
         self.load_data()
         Clock.schedule_interval(self.tick_timer, 1)
+        Clock.schedule_interval(self.reset_video, 30)
         #self.screen = OverviewScreen(items=DB)
 
-        self.sm = ScreenManager()
+        self.sm = ScreenManager(transition=SlideTransition())
         self.intro = IntroScreen(name='intro')
         self.overview = OverviewScreen(name='overview', items=DB)
         self.detail = DetailScreen(name='detail')
@@ -183,8 +240,39 @@ class WOIApp(App):
             self.viewport.add_widget(self.sm)
             return self.viewport
         else:
-            return screen
+            return self.sm
         
+
+    def show_detail(self, *args):
+        self.inactivity_timer = 0
+        try:
+            self.detail = None
+            detail = self.sm.get_screen('detail')
+            self.sm.remove_widget(detail)
+        except:
+            pass
+        self.detail = DetailScreen(name='detail')
+        self.sm.add_widget(self.detail)
+        app.sm.current = 'detail'
+    
+    def show_map(self, *args):
+        self.inactivity_timer = 0
+        self.sm.remove_widget(self.map)
+        self.map = MapScreen(name='map')
+        self.sm.add_widget(self.map)
+        app.sm.current = 'map'
+
+    def show_overview(self, *args):
+        self.inactivity_timer = 0
+        try:
+            self.overview = None
+            overview = self.sm.get_screen('overview')
+            self.sm.remove_widget(overview)
+        except:
+            pass
+        self.overview = OverviewScreen(name='overview', items=DB)
+        self.sm.add_widget(self.overview)
+        app.sm.current = 'overview'
 
     def load_data(self):
         iowans = json.load(open('data/iowans.json', 'r'))
@@ -198,19 +286,13 @@ class WOIApp(App):
                 cat_list = self.categories.get(cat, [])
                 cat_list.append(iowan)
                 self.categories[cat] = cat_list
+        self.categories['all'] = self.iowans[:]
 
 
-    def filter_categories(self, category_buttons):
-        filtered = []
-        active_buttons = [b for b in category_buttons if b.active]
-        for b in active_buttons:
-            filtered.extend(self.categories[b.category])
-        if len(active_buttons) == 0:
-            filtered = self.iowans[:]
-        print "FILTERED", filtered
-        self.filtered_iowans = filtered
+    def filter_categories(self, category):
 
-
+        self.filtered_iowans = self.categories[category]
+        
 
     def select_random_iowan(self):
         self.selected_iowan = random.choice(self.iowans) 

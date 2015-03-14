@@ -3,23 +3,34 @@
 #:import random random.random
 
 <IntroScreen>:
+    video: video
+    eos: video.eos
+
     BoxLayout
         orientation: 'vertical'
         Video:
+            id: video
             size: 1920, 1080
             source: "img/movie.ogg"
-            play: True
-            loop: True
-        AnchorLayout:
-            anchor_x: 'center'
-            anchor_y: 'bottom'
-            padding: 100
-            Image:
-                source: "img/start.png"
-                size_hint: None, None
-                size: 970, 333
-                
+            state: 'play'
 
+        Image:
+            source: "img/intro.png"
+        # AnchorLayout:
+        #     anchor_x: 'center'
+        #     anchor_y: 'bottom'
+        #     padding: 100
+        #     Image:
+        #         source: "img/start.png"
+        #         size_hint: None, None
+        #         size: 970, 333
+                
+    Image:
+        size_hint: None, None
+        pos: 0, 1080
+        size: 1920,1080
+        source: 'img/movie.jpg'
+        opacity: root.fade
 
 
 <CategoryButton>:
@@ -29,58 +40,92 @@
 
     ToggleButton:
         id: toggle
+        group: 'category'
         background_normal: root.background_down
         background_down: root.background_normal 
         on_press: root.on_press()
 
 
 <MapScreen>:
-    MapView:
-        size_hint: None, None
+
+
+
+    Widget:
+        canvas.before:
+            Color:
+                rgba: 0,0,0,1
+            Rectangle:
+                pos: 0,0
+                size: self.size
+
+
+        MapView: 
+            y: -root.x   
+            size_hint: None, None
+            items: app.filtered_iowans
+            center: 1920/2 + 100, 1080/2 -100
+            size: 1024 *1.3, 676*1.3
+    
+
+    GridView:
+        canvas.before:
+            Color:
+                rgba: 0,0,0,1
+            Rectangle:
+                pos: 0,0
+                size: self.size
         items: app.filtered_iowans
-        center: 1920/2, 600
+        size_hint: None, None
+        pos: 0,1080
+        size: 1920,1080
         
 
 
     Widget:
         CategoryButton:
+            category: "all"
+            background_normal: "img/all.png"
+            background_down: "img/all_down.png"
+            y:250 + (125 *4)
+
+        CategoryButton:
             category: "Athletics"
             background_normal: "img/athletics.png"
             background_down: "img/athletics_down.png"
-            y:300
+            y:250 + (125 *3)
 
         CategoryButton:
             category: "Entertainment &amp; Arts"
             background_normal: "img/arts.png"
             background_down: "img/arts_down.png"
-            y:300 + 125
+            y:250 + (125 *2)
 
         CategoryButton:
             category: "Leadership"
             background_normal: "img/leadership.png"
             background_down: "img/leadership_down.png"
-            y:300 + (125*2)
+            y:250 + 125 
 
         CategoryButton:
             category: "Science &amp; Technology"
             background_normal: "img/science.png"
             background_down: "img/science_down.png"
-            y:300 + (125*3)
+            y:250 
 
     Button:
-        background_normal: "img/btn-switch.png"
-        background_down: "img/btn-switch.png"
+        background_normal: "img/btn-switch-slider.png"
+        background_down: "img/btn-switch-slider.png"
         size: 200,200
         size_hint: None, None
         x: 1920 - self.width
         y: 1080 - self.height
-        on_press: app.sm.current = 'overview'
+        on_press: app.show_overview()#app.sm.current = 'overview'
 
 
 
 <OverviewScreen>:
     selection: app.selected_iowan
-    scroll_list: scroll_list
+    #scroll_list: scroll_list
 
     Widget:
         Label:
@@ -88,7 +133,8 @@
             font_name: "img/open-sans/OpenSans-Light.ttf"
             font_size: 70
             text: app.selected_iowan['title']
-            center: 1920/2, 1240
+            center: 1920/2, 1340
+            markup: True
         Label:
             font_name: "img/open-sans/OpenSans-Bold.ttf"
             font_size: 70
@@ -99,29 +145,36 @@
             text_size: 1800, None
             multiline: True
             halign:'center'
+            markup: True
 
+        H1:
+            font_size: 90
+            width: 1920
+            text: app.selected_iowan['title']
+            pos: 100, 1080 - self.height - 100
+          
     BoxLayout:
         orientation:'vertical'
         AnchorLayout:
             anchor_x: 'center'
             anchor_y: 'bottom'
-            padding: 250
+            padding: 330
             MapView:
-                items: root.items
+                items: app.iowans
         ScrollListView: 
-            id: scroll_list
-            items: root.items
+            x: root.x
+            items: app.iowans
 
 
 
     Button:
-        background_normal: "img/btn-switch.png"
-        background_down: "img/btn-switch.png"
+        background_normal: "img/btn-switch-map.png"
+        background_down: "img/btn-switch-map.png"
         size: 200,200
         size_hint: None, None
         x: 1920 - self.width
         y: 1080 - self.height
-        on_press: app.sm.current = 'map'
+        on_press: app.show_map()
 
 
 
@@ -158,6 +211,7 @@
 
     H1:
         id: title
+        font_size: 75
         text: root.title_text
         padding: 75, 0
         width: 1920/2
@@ -174,6 +228,7 @@
         y: title.y - self.height
 
     H3:
+        font_size: 40 
         text: root.excerpt_text
         x: 1920/2
         y: datelabel.y - self.height -50
@@ -216,23 +271,23 @@
         id: photo_tray
         
         Photo:
-            pos: 250,50
+            pos: (250,50) if not ('anon' in app.selected_iowan['image_source']) else (2000,0)
             rotation:  -1
-            photo_type: 'location'
-            source: app.selected_iowan['locationimg_source']
+            photo_type: 'primary'
+            source: app.selected_iowan['image_source']
 
         Photo:
 
-            pos: 350,400
+            pos: (350,400) if not ('anon' in app.selected_iowan['artifactimg_source']) else (2000,0)
             rotation:  -8
             photo_type: 'artifact'
             source: app.selected_iowan['artifactimg_source']
 
         Photo:
-            pos: 50, 380
+            pos: (50, 380) if not ('anon' in app.selected_iowan['locationimg_source']) else (2000,0)
             rotation:  12
-            photo_type: 'primary'
-            source: app.selected_iowan['image_source']
+            photo_type: 'location'
+            source: app.selected_iowan['locationimg_source']
             
 
 
@@ -274,7 +329,7 @@
         size_hint: None, None
         x: 0
         y: 1080- self.height
-        on_press: app.sm.current = 'overview'
+        on_press: app.show_overview() if app.from_screen == 'overview' else app.show_map()
 
 
 # <GridScreen>:

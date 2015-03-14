@@ -14,8 +14,12 @@ def clean_text(text):
     if type(text) == bool:
         return ""
 
+
+
     text = text.encode('ascii','ignore')
+    text = text.encode('utf-8','ignore')
     text = unescape_html(text)
+    text = text.replace("&#039;","'")
     text = text.replace("<br/>", "\n\n")
     text = text.replace("<br />", "\n\n")
     text = text.replace("\r", "")
@@ -23,6 +27,8 @@ def clean_text(text):
     text = text.replace("\\n", "\n")
     text = text.replace("<p>", "\n")
     text = text.replace("</p>", "\n")
+    text = text.replace("<i>", "[i]")
+    text = text.replace("</i>", "[/i]")
     
     return text
 
@@ -108,7 +114,8 @@ for p in iowans:
     p['overview'] = clean_text(p['overview'])
     p['artifactshort'] = clean_text(p['artifactshort'])
     p['artifactlong'] = clean_text(p['artifactlong'])
-    p['locationshort'] = clean_text(p['locationlong'])
+    p['locationlong'] = clean_text(p['locationlong'])
+    p['locationshort'] = clean_text(p['locationshort'])
 
     p['locationgeo'] = p['locationgeo'] or "0,0"
     if not ',' in p['locationgeo']:

@@ -6,9 +6,9 @@ fi
 SCRIPT_PATH=`dirname ${SCRIPT_PATH}`
 cd $SCRIPT_PATH;
 
-cd ./data;
-./update.sh
-cd ..;
+#cd ./data;
+#./update.sh
+#cd ..;
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
     KIVY_APP=${KIVYAPP:=/Applications/Kivy.app}

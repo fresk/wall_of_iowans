@@ -14,9 +14,9 @@ mkdir -p ./cache/256
 mkdir -p ./cache/512
 
 
-#curl -X GET http://www.fresksite.net/dcadb/wp-content/themes/dca/api/iowans.php > _iowans.json
+curl -X GET http://www.fresksite.net/dcadb/wp-content/themes/dca/api/iowans.php > _iowans.json
 python sanitize.py
-exit
+
 
 
 cp ../img/anon.jpg cache/original/anon.jpg

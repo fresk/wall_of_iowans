@@ -12,6 +12,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.factory import Factory as F
 from kivy.graphics.transformation import Matrix
 from kivy.properties import *
+from kivy.animation import Animation
 
 from kivy.utils import interpolate
 
@@ -87,6 +88,28 @@ class ScrollList(ListLayout):
         super(ScrollList, self).__init__(**kwargs)
         self.drag_touch_id = None
         #Clock.schedule_once(self.load_data)
+
+    def scroll_to_selection(self, *args):
+        if not(self.layout and len(self.layout.children)):
+            return
+
+        app = App.get_running_app()
+        pos = self.layout.width -800
+        for c in self.layout.children:
+            if c.data == app.selected_iowan:
+                print "GOT THEM", app.selected_iowan['title']
+                break
+            pos = pos - self.layout.children[0].width
+
+        print "offsetting to ", pos
+        Animation.cancel_all(self)
+        a = Animation(total_offset=-pos, t='out_quad')
+        a.start(self)
+
+
+
+    def on_parent(self, *args):
+        Clock.schedule_once(self.scroll_to_selection, 0.5)
 
     def on_drag_offset(self, *args):
         if self.scroll_layer is None:
@@ -188,7 +211,8 @@ class ScrollList(ListLayout):
                      btn = (self.layout.children[::-1])[idx]
                      app = App.get_running_app()
                      if app.selected_iowan == btn.data:
-                        app.sm.current = 'detail'
+                        app.from_screen = 'overview'
+                        app.show_detail()
                      self.selection = [btn.data]
 
             self.drag_touch_id = None

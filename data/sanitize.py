@@ -1,7 +1,10 @@
+# -*- coding: utf-8 -*-
+
 import json
 import requests
 import hashlib
 import os.path
+
 import os
 import unicodedata
 
@@ -14,11 +17,16 @@ def clean_text(text):
     if type(text) == bool:
         return ""
 
-
-
-    text = text.encode('ascii','ignore')
-    text = text.encode('utf-8','ignore')
-    text = unescape_html(text)
+    print "Type:", type(text)
+    try:
+        text = text.encode('utf-8','ignore')
+        text = text.replace("’","'")
+    except:
+        pass
+    try:
+        text = unescape_html(text)
+    except:
+        pass
     text = text.replace("&#039;","'")
     text = text.replace("<br/>", "\n\n")
     text = text.replace("<br />", "\n\n")
@@ -73,7 +81,7 @@ def save_image(image_data, group):
 
 
 
-iowans = json.load(open('_iowans.json', 'r'))
+iowans = json.load(open('_iowans.json', 'r'), encoding='utf-8') 
 
 for p in iowans:
 

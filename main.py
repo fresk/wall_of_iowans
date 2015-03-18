@@ -81,15 +81,12 @@ class IntroScreen(Screen):
         self.video.opacity = 1
         self.video.source = 'img/movie.ogg'
         self.video.state = 'play'
-        Clock.schedule_once(self.hide_fade_overlay, 0.5)
+        Clock.schedule_once(self.hide_fade_overlay, 0.1)
 
     def restart_video(self, *args):
         self.fade = 1.0
         self.video.source = ""
         self.video.opacity = 0
-        self.video.state = 'stop'
-        self.video.seek(0)
-        self.video.position = 0
         self.video.state = 'play'
         Clock.schedule_once(self.start_video)
 
@@ -137,9 +134,10 @@ class DetailScreen(Screen):
 
 
     def place_photo(self, photo, *args):
-        if photo.photo_type == 'primary':
-            p = (50,380) if not ('anon' in app.selected_iowan['image_source']) else (5000,0)
-            animate(photo, pos=p, scale=1 )
+
+        if self.detail_type != photo.photo_type:
+            self.photo_tray.remove_widget(photo)
+            self.photo_tray.add_widget(photo)
 
         if photo.photo_type == 'location':
             p = (250,50) if not ('anon' in app.selected_iowan['locationimg_source']) else (5000,0)
@@ -147,6 +145,10 @@ class DetailScreen(Screen):
         if photo.photo_type == 'artifact':
             p = (350,400) if not ('anon' in app.selected_iowan['artifactimg_source']) else (5000,0)
             animate(photo, pos=p, scale=1 )
+        if photo.photo_type == 'primary':
+            p = (50,380) if not ('anon' in app.selected_iowan['image_source']) else (5000,0)
+            animate(photo, pos=p, scale=1 )
+
 
 
 
@@ -209,7 +211,7 @@ class WOIApp(App):
 
     def on_inactivity_timer(self, *args):
         if self.inactivity_timer == 60:
-            self.sm.current = 'intro'
+            self.show_intro()
 
     def reset_video(self, *args):
         self.intro.restart_video()
@@ -242,6 +244,18 @@ class WOIApp(App):
         else:
             return self.sm
         
+
+    def show_intro(self, *args):
+        
+        try:
+            self.intro = None
+            intro = self.sm.get_screen('intro')
+            self.sm.remove_widget(intro)
+        except:
+            pass
+        self.intro = DetailScreen(name='intro')
+        self.sm.add_widget(self.intro)
+        app.sm.current = 'intro'
 
     def show_detail(self, *args):
         self.inactivity_timer = 0
